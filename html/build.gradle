@@ -1,0 +1,87 @@
+gwt {
+    gwtVersion='2.11.0'
+    maxHeapSize="1G"
+    minHeapSize="1G"
+
+    src = files(file("src/"))
+    modules 'kovinevav.ru.GdxDefinition'
+    devModules 'kovinevav.ru.GdxDefinitionSuperdev'
+    project.webAppDirName = 'webapp'
+
+    compiler {
+        strict = true;
+        disableCastChecking = true;
+    }
+}
+
+import org.docstr.gradle.plugins.gwt.GwtSuperDev
+import org.akhikhl.gretty.AppBeforeIntegrationTestTask
+
+gretty.httpPort = 8080
+gretty.resourceBase = project.buildDir.path + "/gwt/draftOut"
+gretty.contextPath = "/"
+gretty.portPropertiesFileName = "TEMP_PORTS.properties"
+
+tasks.register('startHttpServer') {
+    dependsOn draftCompileGwt
+
+    doFirst {
+        copy {
+            from "webapp"
+            into gretty.resourceBase
+        }
+
+        copy {
+            from "war"
+            into gretty.resourceBase
+        }
+    }
+}
+
+task beforeRun(type: AppBeforeIntegrationTestTask, dependsOn: startHttpServer) {
+    file("build/TEMP_PORTS.properties").delete()
+    integrationTestTask 'superDev'
+
+    interactive false
+}
+
+tasks.register('superDev', GwtSuperDev) {
+    dependsOn startHttpServer
+    doFirst {
+        gwt.modules = gwt.devModules
+    }
+}
+
+tasks.register('dist') {
+    dependsOn clean, compileGwt
+    doLast {
+        file("build/dist").mkdirs()
+        copy {
+            from "build/gwt/out"
+            into "build/dist"
+        }
+        copy {
+            from "webapp"
+            into "build/dist"
+        }
+        copy {
+            from "war"
+            into "build/dist"
+        }
+    }
+}
+
+tasks.register('addSource') {
+    doLast {
+        sourceSets.main.compileClasspath += files(project(':core').sourceSets.main.allJava.srcDirs)
+    }
+}
+
+tasks.compileGwt.dependsOn(addSource)
+tasks.draftCompileGwt.dependsOn(addSource)
+tasks.checkGwt.dependsOn(addSource)
+
+sourceCompatibility = 1.8
+sourceSets.main.java.srcDirs = [ "src/" ]
+
+eclipse.project.name = appName + "-html"

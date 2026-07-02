@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_background_color">#6EC2B6</color>
+    <!-- Цвет неба в игре — для полос FitViewport по краям экрана -->
+    <color name="game_sky_color">#87CFEB</color>
+</resources>
