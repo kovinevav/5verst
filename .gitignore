@@ -106,6 +106,9 @@ gradle-app.setting
 .DS_Store
 Thumbs.db
 
+## Release binaries (upload via GitHub Releases, not git)
+/releases/*.apk
+
 ## iOS
 /ios/xcode/*.xcodeproj/*
 !/ios/xcode/*.xcodeproj/xcshareddata
